@@ -1,8 +1,9 @@
+import cors from "cors";
 import express from "express";
 import http from "http";
-import serverConfig from "./config/serverConfig";
 import { Server } from "socket.io";
-import cors from "cors";
+import serverConfig from "./config/serverConfig";
+import roomHandler from "./handlers/RoomHandler";
 
 const app = express();
 
@@ -15,6 +16,7 @@ const io = new Server(server, {
 
 io.on("connection", (socket) => {
   console.log("New user connected");
+  roomHandler(socket); // pass socket connection to the room handler for room creation and joining an existing room
   socket.on("disconnect", () => {
     console.log("User disconnected");
   });

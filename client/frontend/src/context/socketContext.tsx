@@ -1,9 +1,10 @@
 import SocketIoClient from "socket.io-client";
-import { createContext } from "react";
+import { createContext, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const WS_Server = "http://localhost:5500";
 
-const socketContext = createContext<any | null>(null);
+export const socketContext = createContext<any | null>(null);
 
 const socket = SocketIoClient(WS_Server);
 
@@ -12,6 +13,13 @@ interface Props {
 }
 
 export const SocketProvider: React.FC<Props> = ({ children }) => {
+  const navigate = useNavigate();
+  useEffect(() => {
+    const enterRoom = ({ roomId }: { roomId: String }) => {
+      navigate(`/room/${roomId}`);
+    };
+    socket.on("room-created", enterRoom);
+  }, [navigate]);
   return (
     <socketContext.Provider value={{ socket }}>
       {children}
