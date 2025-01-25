@@ -1,10 +1,11 @@
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { socketContext } from "../context/SocketContext";
 
 const Room: React.FC = () => {
   const { roomId } = useParams();
   const { socket, user } = useContext(socketContext);
+  const [participants, setParticipants] = useState<string[]>([]);
 
   useEffect(() => {
     if (!user || !roomId || !socket) return;
@@ -19,19 +20,30 @@ const Room: React.FC = () => {
         roomId: string;
         participants: string[];
       }) => {
+        setParticipants(participants); // Update local state with participant list
         console.log("Room participants");
         console.log(roomId, participants);
       };
-      socket.on("get-users", fetchParticipantList);
       socket.emit("joined-room", { roomId, peerId: user._id });
+      socket.on("get-users", fetchParticipantList);
       return () => {
+        console.log("User with ID", user._id, "is leaving room", roomId);
+        socket.emit("leave-room", { roomId, peerId: user._id });
         socket.off("get-users", fetchParticipantList);
       };
     }
   }, [roomId, user, socket]);
   return (
     <>
-      <div>Room ID : {roomId}</div>
+      <div>
+        <h1>Room ID : {roomId}</h1>
+        <h2>Participants:</h2>
+        <ul>
+          {participants.map((participant) => (
+            <li key={participant}>{participant}</li>
+          ))}
+        </ul>
+      </div>
     </>
   );
 };
