@@ -1,10 +1,11 @@
 import { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { socketContext } from "../context/SocketContext";
+import UserFeed from "../Components/UserFeed";
 
 const Room: React.FC = () => {
   const { roomId } = useParams();
-  const { socket, user } = useContext(socketContext);
+  const { socket, user, stream } = useContext(socketContext);
   const [participants, setParticipants] = useState<string[]>([]);
 
   useEffect(() => {
@@ -43,6 +44,7 @@ const Room: React.FC = () => {
             <li key={participant}>{participant}</li>
           ))}
         </ul>
+        <UserFeed stream={stream} />
       </div>
     </>
   );

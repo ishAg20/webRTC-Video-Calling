@@ -19,18 +19,28 @@ export const SocketProvider: React.FC<Props> = ({ children }) => {
 
   //state variable to store userId
   const [user, setUser] = useState<Peer>();
+  const [stream, setStream] = useState<MediaStream>();
+
+  const fetchFeed = async () => {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: true,
+      audio: true,
+    });
+    setStream(stream);
+  };
 
   useEffect(() => {
     const userId = UUIDv4();
     const newPeer = new Peer(userId);
     setUser(newPeer);
+    fetchFeed();
     const enterRoom = ({ roomId }: { roomId: String }) => {
       navigate(`/room/${roomId}`);
     };
     socket.on("room-created", enterRoom);
   }, []);
   return (
-    <socketContext.Provider value={{ socket, user }}>
+    <socketContext.Provider value={{ socket, user, stream }}>
       {children}
     </socketContext.Provider>
   );
