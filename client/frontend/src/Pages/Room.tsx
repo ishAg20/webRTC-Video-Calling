@@ -5,7 +5,7 @@ import UserFeed from "../Components/UserFeed";
 
 const Room: React.FC = () => {
   const { roomId } = useParams();
-  const { socket, user, stream } = useContext(socketContext);
+  const { socket, user, stream, peers } = useContext(socketContext);
   const [participants, setParticipants] = useState<string[]>([]);
 
   useEffect(() => {
@@ -37,14 +37,21 @@ const Room: React.FC = () => {
   return (
     <>
       <div>
-        <h1>Room ID : {roomId}</h1>
-        <h2>Participants:</h2>
-        <ul>
-          {participants.map((participant) => (
-            <li key={participant}>{participant}</li>
+        <h1>
+          Room ID : {roomId}
+          <br />
+          You :
+        </h1>
+
+        {stream && <UserFeed stream={stream} />}
+        <div>
+          Other people on the Call
+          {Object.keys(peers).map((peerId) => (
+            <>
+              <UserFeed key={peerId} stream={peers[peerId].stream}></UserFeed>
+            </>
           ))}
-        </ul>
-        <UserFeed stream={stream} />
+        </div>
       </div>
     </>
   );

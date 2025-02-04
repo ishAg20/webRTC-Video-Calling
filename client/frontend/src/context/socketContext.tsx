@@ -1,8 +1,10 @@
 import SocketIoClient from "socket.io-client";
-import { createContext, useEffect, useState } from "react";
+import { createContext, useEffect, useReducer, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { v4 as UUIDv4 } from "uuid";
 import Peer from "peerjs";
+import { peerReducer } from "../Reducers/peerReducer";
+import { addPeerAction } from "../Actions/peerAction";
 
 const WS_Server = "http://localhost:5500";
 
@@ -21,6 +23,7 @@ export const SocketProvider: React.FC<Props> = ({ children }) => {
   const [user, setUser] = useState<Peer>();
   const [stream, setStream] = useState<MediaStream>();
 
+  const [peers, dispatch] = useReducer(peerReducer, {});
   const fetchFeed = async () => {
     const stream = await navigator.mediaDevices.getUserMedia({
       video: true,
@@ -43,8 +46,30 @@ export const SocketProvider: React.FC<Props> = ({ children }) => {
     };
     socket.on("room-created", enterRoom);
   }, []);
+
+  useEffect(() => {
+    if (!user || !stream) return;
+    socket.on("user-joined", ({ peerId }) => {
+      const call = user.call(peerId, stream);
+      console.log(`Calling new peer ${peerId}`);
+      call.on("stream", () => {
+        dispatch(addPeerAction(peerId, stream));
+      });
+    });
+
+    user.on("call", (call) => {
+      // What new user should do when all users call new user
+      console.log("Receiving a call");
+      call.answer(stream);
+      call.on("stream", () => {
+        dispatch(addPeerAction(call.peer, stream));
+      });
+    });
+    socket.emit("ready");
+  }, [user, stream]);
+
   return (
-    <socketContext.Provider value={{ socket, user, stream }}>
+    <socketContext.Provider value={{ socket, user, stream, peers }}>
       {children}
     </socketContext.Provider>
   );
