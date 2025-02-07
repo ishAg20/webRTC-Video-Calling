@@ -63,7 +63,7 @@ const JoinRoom: React.FC<JoinRoomProps> = ({ name, disabled }) => {
             setError(null); // Clear error when user types
           }}
           required
-          className="px-4 py-2 border border-gray-300 rounded-md text-black"
+          className="px-4 py-2 border border-gray-300 rounded-md text-white"
         />
         <button
           type="submit"

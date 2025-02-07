@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 
 interface UserFeedProps {
-  stream: MediaStream;
+  stream: MediaStream | null;
   name: string;
 }
 
@@ -9,8 +9,10 @@ const UserFeed: React.FC<UserFeedProps> = ({ stream, name }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.srcObject = stream || null;
+    if (videoRef.current && stream) {
+      videoRef.current.srcObject = stream;
+    } else if (videoRef.current) {
+      videoRef.current.srcObject = null;
     }
   }, [stream]);
 
@@ -48,18 +50,28 @@ const UserFeed: React.FC<UserFeedProps> = ({ stream, name }) => {
 
   return (
     <div style={styles.container}>
+      {/* Always render the container, even if the stream is null */}
       {stream ? (
-        <>
-          <video ref={videoRef} style={styles.video} muted autoPlay />
-          <div style={styles.overlay}>
-            <p style={styles.nameText}>{name}</p>
-          </div>
-        </>
+        <video ref={videoRef} style={styles.video} muted autoPlay />
       ) : (
-        <p style={{ color: "red", textAlign: "center", fontWeight: "bold" }}>
-          No stream available.
-        </p>
+        <div
+          style={{
+            width: "100%",
+            height: "150px",
+            backgroundColor: "#444",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "#fff",
+            fontSize: "16px",
+          }}
+        >
+          No stream available
+        </div>
       )}
+      <div style={styles.overlay}>
+        <p style={styles.nameText}>{name}</p>
+      </div>
     </div>
   );
 };

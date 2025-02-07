@@ -6,7 +6,9 @@ import UserFeed from "../Components/UserFeed";
 const Room: React.FC = () => {
   const { roomId } = useParams();
   const { socket, user, stream, peers } = useContext(socketContext);
-  const [participants, setParticipants] = useState<string[]>([]);
+  const [participants, setParticipants] = useState<
+    { peerId: string; name: string }[]
+  >([]);
   const [socketConnected, setSocketConnected] = useState(true);
 
   useEffect(() => {
@@ -21,14 +23,14 @@ const Room: React.FC = () => {
       participants,
     }: {
       roomId: string;
-      participants: string[];
+      participants: { peerId: string; name: string }[];
     }) => {
       setParticipants(participants); // Update local state with participant list
       console.log("Room participants:", participants);
     };
 
     // Emit room join event
-    socket.emit("joined-room", { roomId, peerId: user._id });
+    socket.emit("joined-room", { roomId, peerId: user._id, name: user.name });
 
     // Listen for participant updates
     socket.on("get-users", fetchParticipantList);
@@ -57,10 +59,10 @@ const Room: React.FC = () => {
 
       {socketConnected ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full max-w-5xl">
-          {/* Display user's own feed */}
+          {/*  Display user's own feed */}
           {stream && (
             <div className="border p-2 rounded-lg bg-white shadow-md">
-              <UserFeed stream={stream} name={user?.name || "You"} />
+              <UserFeed stream={stream || null} name={user?.name || "You"} />
             </div>
           )}
 
@@ -72,7 +74,7 @@ const Room: React.FC = () => {
                 className="border p-2 rounded-lg bg-white shadow-md"
               >
                 <UserFeed
-                  stream={peers[peerId].stream}
+                  stream={peers[peerId].stream || null}
                   name={peers[peerId].name || "Participant"}
                 />
               </div>
