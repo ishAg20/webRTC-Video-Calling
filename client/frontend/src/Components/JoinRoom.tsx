@@ -18,27 +18,22 @@ const JoinRoom: React.FC<JoinRoomProps> = ({ name, disabled }) => {
     (e: React.FormEvent) => {
       e.preventDefault();
       if (!roomId.trim() || disabled) return;
-      console.log("⚡ Attempting to join room:", roomId);
+
       if (!socket || !socket.connected) {
         setError("⚠️ Connection error. Please try again.");
         return;
       }
 
       setLoading(true);
-      setError(null); // Clear any previous error
+      setError(null);
 
-      console.log("📡 Emitting 'check-room' event to server...");
-
-      // Check if the room exists before joining
       socket.emit("check-room", roomId, (response: { exists: boolean }) => {
         setLoading(false);
         if (!response) {
           setError("❌ No response from server. Try again.");
-          console.error("❌ No response received for 'check-room' event.");
           return;
         }
 
-        console.log("🔍 Server response:", response);
         if (response.exists) {
           socket.emit("joined-room", { roomId, name });
           navigate(`/room/${roomId}`);
@@ -51,23 +46,25 @@ const JoinRoom: React.FC<JoinRoomProps> = ({ name, disabled }) => {
   );
 
   return (
-    <div className="p-4 bg-white shadow-md rounded-lg">
-      <h2 className="text-xl font-semibold mb-4">Join a Room</h2>
-      <form onSubmit={handleJoinRoom} className="flex flex-col gap-3">
+    <div className="w-full flex flex-col items-center">
+      <h2 className="text-lg md:text-xl font-bold mb-4 text-white text-center">
+        Join a Room
+      </h2>
+      <form onSubmit={handleJoinRoom} className="w-full space-y-4">
         <input
           type="text"
           placeholder="Enter Room ID"
           value={roomId}
           onChange={(e) => {
             setRoomId(e.target.value);
-            setError(null); // Clear error when user types
+            setError(null);
           }}
           required
-          className="px-4 py-2 border border-gray-300 rounded-md text-white"
+          className="w-full px-4 py-2 bg-gray-700 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <button
           type="submit"
-          className={`px-4 py-2 rounded-md text-white ${
+          className={`w-full px-4 py-2 rounded-md text-white text-center transition-colors duration-200 ${
             disabled || loading || !roomId.trim()
               ? "bg-gray-400 cursor-not-allowed"
               : "bg-blue-500 hover:bg-blue-600"
@@ -77,7 +74,9 @@ const JoinRoom: React.FC<JoinRoomProps> = ({ name, disabled }) => {
           {loading ? "Checking..." : "Join Room"}
         </button>
       </form>
-      {error && <p className="text-red-500 mt-2">{error}</p>}
+      {error && (
+        <p className="text-red-500 mt-4 text-center text-sm w-full">{error}</p>
+      )}
     </div>
   );
 };
