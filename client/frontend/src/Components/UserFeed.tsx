@@ -9,10 +9,8 @@ const UserFeed: React.FC<UserFeedProps> = ({ stream, name }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
-    if (videoRef.current && stream) {
-      videoRef.current.srcObject = stream;
-    } else if (videoRef.current) {
-      videoRef.current.srcObject = null;
+    if (videoRef.current) {
+      videoRef.current.srcObject = stream || null;
     }
   }, [stream]);
 
